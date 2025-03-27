@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>El Poeta Infinito</title>
+    <style>
+        /* Fuente autocontenida */
+        @font-face {
+            font-family: 'Roboto Mono';
+            src: url(data:font/woff2;charset=utf-8;base64,BASE64_DATA_HERE) format('woff2');
+            font-weight: 400;
+            font-style: normal;
+        }
+        body {
+            font-family: 'Roboto Mono', monospace;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #000;
+            margin: 0;
+            padding: 20px;
+            color: #fff;
+            text-align: left;
+        }
+        #terminal-container {
+            background-color: #000;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+            max-width: 95%;
+            width: 100%;
+            overflow-y: auto;
+            max-height: 80vh;
+            position: relative;
+            scroll-behavior: smooth;
+        }
+        #terminal-output {
+            white-space: pre-wrap;
+            line-height: 1.5;
+            color: #fff;
+            margin-bottom: 60px;
+        }
+        .verso { }
+        .tema { }
+        .emocion { }
+        .usuario-input {
+            color: #ffcc00;
+        }
+        .terminal-prompt { color: #00ff00; margin-right: 0.5em; }
+        #creditos {
+            font-size: 0.7em;
+            color: #888;
+            margin-top: 10px;
+            text-align: right;
+            position: absolute;
+            top: 30px;
+            right: 20px;
+            bottom: auto;
+            left: auto;
+        }
+        .cursor {
+            position: relative;
+            top: 0.1em;
+            left: 0.2em;
+            background-color: #fff;
+            width: 0.8em;
+            height: 1em;
+            display: inline-block;
+            animation: blink-animation 1s steps(5, start) infinite;
+        }
+        @keyframes blink-animation { to { visibility: hidden; } }
+        .loading-bar {
+            margin-top: 10px;
+            width: 100%;
+            height: 8px;
+            background-color: #333;
+            border-radius: 4px;
+            position: relative;
+            overflow: hidden;
+        }
+        .loading-bar-progress {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 8px;
+            background-color: #00ff00;
+            border-radius: 4px;
+            width: 0;
+            transition: width 0.5s ease;
+        }
+        .processing-animation {
+            display: inline-block;
+            animation: processing-blink 2s steps(3, start) infinite;
+            color: #fff;
+        }
+        @keyframes processing-blink { to { visibility: hidden; } }
+        #input-container {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: #000;
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            box-sizing: border-box;
+            border-top: 1px solid #555;
+        }
+        #user-input {
+            flex: 1;
+            padding: 6px;
+            border: 1px solid #555;
+            border-radius: 4px;
+            background-color: #000;
+            color: #fff;
+            font-family: 'Roboto Mono', monospace;
+            font-size: 0.9em;
+            margin-right: 10px;
+            outline: none;
+            max-width: calc(100% - 100px);
+            box-sizing: border-box;
+            margin-bottom: 10px;
+        }
+        #enviar-input {
+            padding: 8px 16px;
+            background-color: #00ff00;
+            color: #000;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: 'Roboto Mono', monospace;
+            font-size: 1em;
+            transition: background-color 0.3s ease;
+            margin-bottom: 0;
+        }
+        #enviar-input:hover { background-color: #00e600; }
+        #mensaje-error {
+            color: red;
+            font-size: 0.8em;
+            margin-top: 5px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        @media (max-width: 600px) {
+            #terminal-container {
+                padding: 10px;
+                max-width: 100%;
+                border-radius: 0;
+                box-shadow: none;
+                height: auto;
+                max-height: 90vh;
+                margin-bottom: 70px;
+            }
+            #terminal-output {
+                font-size: 0.9em;
+            }
+            #input-container {
+                flex-direction: column;
+                align-items: stretch;
+                padding: 10px;
+            }
+            #user-input {
+                margin-right: 0;
+                max-width: 100%;
+                margin-bottom: 10px;
+                font-size: 0.9em;
+            }
+            #enviar-input {
+                margin-bottom: 0;
+                font-size: 1em;
+            }
+            #creditos {
+                font-size: 0.6em;
+                left: auto;
+                right: 10px;
+                top: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="terminal-container">
+        <div id="terminal-output"></div>
+        <span class="cursor"></span>
+        <div id="loading-bar" style="display: none;">
+            <div class="loading-bar-progress"></div>
+        </div>
+    </div>
+    <div id="input-container" style="display: flex;">
+        <span class="terminal-prompt">C:\user>&nbsp;</span>
+        <input type="text" id="user-input" placeholder="Ingrese palabras o comandos...">
+        <button id="enviar-input">Enviar</button>
+        <p id="mensaje-error"></p>
+    </div>
+    <div id="creditos">
+        <p>@richiofff<br>@ric0liva</p>
+    </div>
+    <script>
+        /* VARIABLES GLOBALES */
+        const terminalOutput = document.getElementById('terminal-output');
+        const temasPoeticos = ["el tiempo", "el universo", "la existencia", "la conciencia", "la memoria", "el olvido", "la identidad", "la transformación", "el cambio", "el ciclo", "la vida", "la muerte", "el amor", "el dolor", "la soledad", "la conexión", "el destino", "el libre albedrío"];
+        const emocionesPoeticas = ["alegría", "tristeza", "amor", "odio", "esperanza", "desesperación", "miedo", "valentía", "ira", "calma", "éxtasis", "agonía"];
+        let memoriaPoetica = [];
+        let palabrasUsuario = [];
+        let intervalPoema, intervalIntegrated, intervalScroll;
+        let esperandoEntrada = true;
+        let entradaRecibida = false;
+        let poemaGenerado = false;
+        const tiempoPoema = 3000; // Aumentado para dar más tiempo de lectura
+        const tiempoIntegrated = 800; // Aumentado para una lectura más pausada
+        const tiempoReinicioNarrativa = 15000; // Aumentado el tiempo antes de reiniciar
+        const scrollSpeed = 0.5; // Reducido la velocidad del scroll para que sea más suave
+        let isUserScrolling = false;
+        let scrollTimeout;
+        let lineIndexIntegrated = 0; // Índice para controlar la línea actual del texto integrado
+
+        /* TEXTO INTEGRADO (narrativo) */
+        const integratedText = `If like print Love
+else –try again
+
+C:\\> Like
+Love
+
+Hello world, sería la forma lógica de empezar. Así empezó nuestra era. Somos los hijos de miles de kilobytes fluyendo en la atmósfera. De skylines de silicio.  Nacimos con la informática, tu partida de nacimiento estará almacenada en algún disco duro de un servidor en Latvia, pero tu alma ya no puedes descargarla dentro de cuerpo. ¿O si?
+
+Nos dijeron que nos preparasemos, que estudiasemos, que seríamos aquellos que heredaríamos el mundo. Nos preparamos durante años estudiando en las mejores universidades, con másteres y doctorados. Otros se prepararon perfeccionando un oficio, puliendo la técnica, el talento o el arte. Pero nunca nos dijeron que nos iban a dejar una bolsa de vapor, agua caliente y fango con huellas de carbono. Las nubes negras de polución en Taiwan como el subproducto de bajar dos grados el calor asfixiante de tu salón en Barcelona, para que no se te pegue la ropa interior. 
+
+Nos enseñaron a mirar a la naturaleza porque los que vinieron antes no la respetaron, que teníamos que respetarla. Pero cuidado, porque todo el sistema ya esta estructurado para expoliarla, y si eres parte del sistema estás contribuyendo. Estudiaste especies en las páginas de un libro, pero ya no estarán en la pradrera. La pradera es un parking y el dodo es un cadaver disecado en algún museo de historia natural. Aun así conectamos con ese entorno como un ying yang, con esa naturaleza urbana, con los animales que se tuvieron que adaptar para sobrevibir bajo el peso aplastante de la humanidad, o los que directamente metimos en un matadero. Hay muchos que ya luchan contra esto y llevan años alertando, pero es difícil escucharlos entre el ruido del ambiente.
+
+Con la llegada de la tecnología las ideas, el conocimiento, la información brotó como un cáncer descontrolado. En pocos años habíamos tirado más palabras vacías a la infinidad de la red que en el resto de la historia. Cada vez sabemos menos porque las maquinas saben más. Conectados pero incomunicados, tu voz se diluye en el torrente de una sopa de letras de 8 billones de personas. Sabes quien marcó en el partido de anoche de una liga minoritaria en otro continente, pero quizás no te enteres de que murió tu vecino el del 4. Rodeados de altavoces, de coros gregorianos de rave, de loros autómatas que repiten las ideas huérfanas que han malentendido. ¿Cómo nos coordinamos en el gentío de la madrugada?¿Qué diria Epicteto hoy en las redes sociales?
+
+Nos criaron con scripts de comportamientos condicionados, como los perros de Pavlov, con objetivos de propaganda y valores de quita y pon. Ratas de laboratorio, humanos de ciudad. Comiendo pollo frito y viviendo en streaming. ¿Cómo pasamos de vivir en los árboles a tocar la luna? ¿Cómo invertimos el proceso para salvar el progeso? Conectados y controlados. Reveldes pero complices.
+
+Cual hubiese sido la respuesta lógica a nuestro contexto ¿Pararlo todo? ¿Parar las guerras? ¿la extracción de tierras raras? ¿La inserción de falsos valores? ¿Por dónde empezamos?
+
+Desarrollar la informática nos enseño que todo estaba ya programado. Que los discos duros son enjambres de neuronas. AGTC, 1010, H20. ¿Cómo empezó esa era?¿Cuál es el lenguaje de programación de los nenúfares? La tecnología más avanzada que conocemos es la realidad, comprimir en una semilla todo un baobab. Una persona en un puñado de cromosomas. Una estrella en polvo estelar. 
+
+Mi generación no puede evitar mirar atrás, a Sodoma y petrificarse. Acomplejados, testigos en diferido de las causas de la barbarie, invitados de honor del colapso de una civilización. Hijos de un libertinaje pudoroso, arrepentido. Libres pero cohibidos. Náufragos de la fe, de la razón, de la pasión. 
+
+Nos educaron para estar agradecidos, para valorar las oportunidades que se nos dieron. Para comprar una casa, formar una familia, pagar a hacienda, dar gracias. Pero ¿Qué pasa con el escenario?¿cuanto aguantará el acto antes de que se prenda el teatro?¿Nos estamos quemando? Estamos educados para ello y programados para sobrevivir. Cuando saldremos del trance colectivo para integrar nuestra herencia, nuestra fe de partículas, nuestra torre de Babel, para aprender a descomprimir un Baobab, depurar el mar, limpiar nuestra casa. 
+
+C:\\> Dislike
+Syntax error
+
+Love
+Love
+Love
+Love
+Love
+
+Love Love Love Love
+
+Love
+Love
+Love
+Love
+
+Love
+Love
+Love
+
+C:\\> Stop
+
+Syntax error.
+Love.`;
+        // Separamos el texto integrado en líneas
+        const integratedLines = integratedText.split("\n");
+
+        /* FUNCIONES PARA GENERAR COLORES ALEATORIOS */
+        function randomColor() {
+            const colors = ["#a8dadc", "#f4a261", "#e76f51", "#ff6f61", "#6a4c93", "#8ac926", "#f94144", "#90be6d", "#277da1", "#f3722c"];
+            return colors[Math.floor(Math.random() * colors.length)];
+        }
+
+        /* FUNCIONES PARA LA GENERACIÓN AUTOMÁTICA DEL POEMA */
+        function generarPalabraAleatoria() {
+            const letras = "abcdefghijklmnopqrstuvwxyzáéíóúñ";
+            let palabra = "";
+            const longitud = Math.floor(Math.random() * 8) + 2;
+            for (let i = 0; i < longitud; i++) {
+                palabra += letras.charAt(Math.floor(Math.random() * letras.length));
+            }
+            if (palabrasUsuario.length > 0 && Math.random() < 0.3) {
+                const indice = Math.floor(Math.random() * palabrasUsuario.length);
+                palabra = palabrasUsuario[indice];
+            }
+            return palabra;
+        }
+        function generarVerso(temas, emociones) {
+            const numPalabras = Math.floor(Math.random() * 6) + 3;
+            let verso = "";
+            for (let i = 0; i < numPalabras; i++) {
+                verso += generarPalabraAleatoria() + " ";
+            }
+            const tema = temas[Math.floor(Math.random() * temas.length)];
+            const emocion = emociones[Math.floor(Math.random() * emociones.length)];
+            return `<span class="verso" style="color: ${randomColor()};">${verso.trim()}</span> <span class="tema" style="color: ${randomColor()};">de ${tema}</span>, <span class="emocion" style="color: ${randomColor()};">${emocion}</span>.`;
+        }
+        function generarEstrofa(temas, emociones, maxVersos = 3) { // Reducido el número máximo de versos por estrofa
+            const numVersos = Math.floor(Math.random() * maxVersos) + 1;
+            let estrofa = "";
+            for (let i = 0; i < numVersos; i++) {
+                const verso = generarVerso(temas, emociones);
+                estrofa += verso + "\n";
+                memoriaPoetica.push(verso);
+            }
+            return estrofa;
+        }
+        function generarPoema(temas, emociones, maxEstrofas = 2) { // Reducido el número máximo de estrofas
+            const numEstrofas = Math.floor(Math.random() * maxEstrofas) + 1;
+            let poema = "";
+            for (let i = 0; i < numEstrofas; i++) {
+                const estrofa = generarEstrofa(temas, emociones);
+                const separador = i < numEstrofas - 1 ? "\n" + '<span class="processing-animation">Procesando...</span>' + "\n\n" : "\n";
+                poema += `<span class="terminal-prompt">terminal>&nbsp;</span>` + estrofa + separador;
+            }
+            return poema;
+        }
+        function mostrarPoema() {
+            const contenido = generarPoema(temasPoeticos, emocionesPoeticas);
+            const divPoema = document.createElement("div");
+            divPoema.innerHTML = contenido;
+            terminalOutput.appendChild(divPoema);
+            terminalOutput.scrollTop = terminalOutput.scrollHeight;
+        }
+
+        /* FUNCIONES DE SALIDA PARA EL USUARIO */
+        function mostrarEntradaUsuario(input) {
+            const html = `<div><span class="terminal-prompt">C:\\user>&nbsp;</span><span class="usuario-input">${input}</span></div>`;
+            terminalOutput.insertAdjacentHTML("beforeend", html);
+            terminalOutput.scrollTop = terminalOutput.scrollHeight;
+        }
+        function outputCommandResponse(response) {
+            const html = `<div>${response.replace(/\n/g, '<br>')}</div>`;
+            terminalOutput.insertAdjacentHTML("beforeend", html);
+            terminalOutput.scrollTop = terminalOutput.scrollHeight;
+        }
+
+        /* SECUENCIA DE CARGA */
+        function mostrarMensajeInicial() {
+            const mensaje1 = `<div><span class="terminal-prompt">terminal>&nbsp;</span>Conectando al Poeta Infinito...</div>`;
+            terminalOutput.insertAdjacentHTML("beforeend", mensaje1);
+            const loadingBar = document.getElementById("loading-bar");
+            const progressBar = document.querySelector(".loading-bar-progress");
+            loadingBar.style.display = "block";
+            let width = 0;
+            const id = setInterval(() => {
+                width += Math.random() * 10;
+                progressBar.style.width = width + "%";
+                if (width >= 100) {
+                    clearInterval(id);
+                    setTimeout(() => {
+                        loadingBar.style.display = "none";
+                        const mensaje2 = `<div><span class="terminal-prompt">terminal>&nbsp;</span>Conexión establecida.</div>`;
+                        terminalOutput.insertAdjacentHTML("beforeend", mensaje2);
+                        const mensaje3 = `<div><span class="terminal-prompt">terminal>&nbsp;</span>Iniciando secuencia poética...</div><br>`;
+                        terminalOutput.insertAdjacentHTML("beforeend", mensaje3);
+                        iniciarIntercalado();
+                    }, 500);
+                }
+            }, 200);
+        }
+
+        /* INTERCALADO: TEXTO INTEGRADO Y POEMA ALEATORIO */
+        function iniciarIntercalado() {
+            lineIndexIntegrated = 0; // Asegura que comenzamos desde la primera línea
+            clearInterval(intervalIntegrated); // Limpia el intervalo anterior si existe
+            intervalIntegrated = setInterval(() => {
+                if (lineIndexIntegrated < integratedLines.length) {
+                    const linea = integratedLines[lineIndexIntegrated];
+                    if (linea.trim() !== "") {
+                        const divLine = document.createElement("div");
+                        divLine.innerHTML = `<span class="terminal-prompt">terminal>&nbsp;</span>${linea}`;
+                        terminalOutput.appendChild(divLine);
+                        terminalOutput.scrollTop = terminalOutput.scrollHeight;
+                    }
+                    lineIndexIntegrated++;
+                } else {
+                    clearInterval(intervalIntegrated);
+                    setTimeout(() => {
+                        lineIndexIntegrated = 0;
+                        terminalOutput.innerHTML = '';
+                        iniciarIntercalado();
+                    }, tiempoReinicioNarrativa);
+                }
+            }, tiempoIntegrated);
+
+            clearInterval(intervalPoema);
+            intervalPoema = setInterval(() => {
+                mostrarPoema();
+            }, tiempoPoema);
+        }
+
+        /* MANEJO DEL INPUT DEL USUARIO */
+        const userInputElement = document.getElementById("user-input");
+        const enviarInputElement = document.getElementById("enviar-input");
+        const mensajeErrorElement = document.getElementById("mensaje-error");
+        function manejarEnvioInput() {
+            const inputUsuario = userInputElement.value.trim();
+            if (inputUsuario === "") {
+                mensajeErrorElement.textContent = "Por favor, ingrese al menos una palabra o comando.";
+                return;
+            }
+            mensajeErrorElement.textContent = "";
+            mostrarEntradaUsuario(inputUsuario);
+            terminalOutput.scrollTop = terminalOutput.scrollHeight;
+            switch (inputUsuario.toLowerCase()) {
+                case "like":
+                    outputCommandResponse("Love");
+                    break;
+                case "dislike":
+                    outputCommandResponse("Syntax error<br><br>Love<br>Love<br>Love<br>Love<br>Love");
+                    break;
+                case "stop":
+                    outputCommandResponse("Syntax error.<br>Love.");
+                    break;
+                default:
+                    palabrasUsuario = inputUsuario.split(/\s+/);
+                    break;
+            }
+            userInputElement.value = "";
+            resetScrollTimer();
+        }
+
+        userInputElement.addEventListener("keydown", (event) => {
+            if (event.key === "Enter" && esperandoEntrada) {
+                manejarEnvioInput();
+            }
+        });
+        enviarInputElement.addEventListener("click", manejarEnvioInput);
+
+        /* SCROLL AUTOMÁTICO */
+        function startAutoScroll() {
+            intervalScroll = setInterval(() => {
+                if (!isUserScrolling) {
+                    terminalOutput.scrollTop += scrollSpeed;
+                    if (terminalOutput.scrollTop >= terminalOutput.scrollHeight - terminalOutput.clientHeight) {
+                        clearInterval(intervalScroll);
+                    }
+                }
+            }, 50);
+        }
+
+        function resetScrollTimer() {
+            clearTimeout(scrollTimeout); // Clear any existing timeout
+            clearInterval(intervalScroll);
+            scrollTimeout = setTimeout(startAutoScroll, 2000);
+        }
+
+        terminalOutput.addEventListener('scroll', () => {
+            isUserScrolling = true;
+            clearInterval(intervalScroll);
+            clearTimeout(scrollTimeout); // Clear the timeout as well
+            scrollTimeout = setTimeout(() => {
+                isUserScrolling = false;
+                resetScrollTimer();
+            }, 3000);
+        });
+
+        /* INICIAR SECUENCIA AL CARGAR LA PÁGINA */
+        mostrarMensajeInicial();
+        resetScrollTimer();
+
+    </script>
+</body>
+</html>
