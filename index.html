@@ -1,468 +1,707 @@
+<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>El Poeta Infinito</title>
+    <title>I'M NOT A HUMAN</title>
+    <meta name="description" content="Verificación CAPTCHA interactiva para asegurar que eres humano.">
+    <meta name="keywords" content="CAPTCHA, verificación, seguridad, humano, interactivo, formulario">
+    <meta name="author" content="Tu Nombre o Empresa">
+    <link rel="canonical" href="https://tudominio.com/captcha-interactivo">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.css" rel="stylesheet" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@400;600&display=swap" rel="stylesheet">
     <style>
-        /* Fuente autocontenida */
-        @font-face {
-            font-family: 'Roboto Mono';
-            src: url(data:font/woff2;charset=utf-8;base64,BASE64_DATA_HERE) format('woff2');
-            font-weight: 400;
-            font-style: normal;
-        }
+        /* Estilos generales */
         body {
-            font-family: 'Roboto Mono', monospace;
+            font-family: 'Inter', sans-serif;
+            background-color: #f9fafb;
+            color: #374151;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            background-color: #000;
             margin: 0;
             padding: 20px;
-            color: #fff;
-            text-align: left;
         }
-        #terminal-container {
-            background-color: #000;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.5);
-            max-width: 95%;
+        #captcha-container {
+            background-color: #ffffff;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            padding: 1.5rem;
             width: 100%;
-            overflow-y: auto;
-            max-height: 80vh;
-            position: relative;
-            scroll-behavior: smooth;
+            max-width: 400px;
+            box-sizing: border-box;
         }
-        #terminal-output {
-            white-space: pre-wrap;
-            line-height: 1.5;
-            color: #fff;
-            margin-bottom: 60px;
-        }
-        .verso { }
-        .tema { }
-        .emocion { }
-        .usuario-input {
-            color: #ffcc00;
-        }
-        .terminal-prompt { color: #00ff00; margin-right: 0.5em; }
-        #creditos {
-            font-size: 0.7em;
-            color: #888;
-            margin-top: 10px;
-            text-align: right;
-            position: absolute;
-            top: 30px;
-            right: 20px;
-            bottom: auto;
-            left: auto;
-        }
-        .cursor {
-            position: relative;
-            top: 0.1em;
-            left: 0.2em;
-            background-color: #fff;
-            width: 0.8em;
-            height: 1em;
-            display: inline-block;
-            animation: blink-animation 1s steps(5, start) infinite;
-        }
-        @keyframes blink-animation { to { visibility: hidden; } }
-        .loading-bar {
-            margin-top: 10px;
-            width: 100%;
-            height: 8px;
-            background-color: #333;
-            border-radius: 4px;
-            position: relative;
-            overflow: hidden;
-        }
-        .loading-bar-progress {
-            position: absolute;
-            top: 0;
-            left: 0;
-            height: 8px;
-            background-color: #00ff00;
-            border-radius: 4px;
-            width: 0;
-            transition: width 0.5s ease;
-        }
-        .processing-animation {
-            display: inline-block;
-            animation: processing-blink 2s steps(3, start) infinite;
-            color: #fff;
-        }
-        @keyframes processing-blink { to { visibility: hidden; } }
-        #input-container {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            background-color: #000;
-            padding: 10px 20px;
+        .flex-center {
             display: flex;
             align-items: center;
-            flex-wrap: wrap;
-            box-sizing: border-box;
-            border-top: 1px solid #555;
+            justify-content: center;
         }
-        #user-input {
-            flex: 1;
-            padding: 6px;
-            border: 1px solid #555;
-            border-radius: 4px;
-            background-color: #000;
-            color: #fff;
-            font-family: 'Roboto Mono', monospace;
-            font-size: 0.9em;
-            margin-right: 10px;
-            outline: none;
-            max-width: calc(100% - 100px);
-            box-sizing: border-box;
-            margin-bottom: 10px;
+        .mb-4 {
+            margin-bottom: 1rem;
         }
-        #enviar-input {
-            padding: 8px 16px;
-            background-color: #00ff00;
-            color: #000;
-            border: none;
-            border-radius: 4px;
+        .mt-4 {
+            margin-top: 1rem;
+        }
+        .font-semibold {
+            font-weight: 600;
+        }
+        .text-sm {
+            font-size: 0.875rem;
+            line-height: 1.25rem;
+        }
+        .text-center {
+            text-align: center;
+        }
+        .hidden {
+            display: none !important;
+        }
+        .form-checkbox {
+            height: 1.25rem;
+            width: 1.25rem;
+            color: #3b82f6;
+            border-radius: 0.25rem;
             cursor: pointer;
-            font-family: 'Roboto Mono', monospace;
-            font-size: 1em;
-            transition: background-color 0.3s ease;
-            margin-bottom: 0;
         }
-        #enviar-input:hover { background-color: #00e600; }
-        #mensaje-error {
-            color: red;
-            font-size: 0.8em;
-            margin-top: 5px;
+        .form-checkbox:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5);
+        }
+        .ml-2 {
+            margin-left: 0.5rem;
+        }
+        .text-gray-700 {
+            color: #4b5563;
+        }
+        /* Estilos del logo reCAPTCHA */
+        .recaptcha-logo {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background-color: #805AD5;
+            border: 4px solid #805AD5;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto;
+        }
+        .recaptcha-bar {
+            background-color: #FFFFFF;
+            width: 16px;
+            height: 3px;
+            border-radius: 1.5px;
+            position: absolute;
+        }
+        .recaptcha-bar:nth-child(1) {
+            transform: rotate(45deg);
+        }
+        .recaptcha-bar:nth-child(2) {
+            transform: rotate(-45deg);
+        }
+        .recaptcha-text {
+            font-size: 0.7rem;
+            color: #757575;
+            margin-top: 0.25rem;
+            text-align: center;
+        }
+        /* Estilos de los desafíos */
+        #challenge-area {
+            margin-top: 1rem;
+        }
+        #text-challenge-input {
+            appearance: none;
+            border: 1px solid #d1d5db;
+            border-radius: 0.375rem;
+            padding: 0.5rem 0.75rem;
             width: 100%;
-            box-sizing: border-box;
+            color: #374151;
+            font-size: 0.875rem;
+            line-height: 1.25rem;
+            outline: none;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.06);
         }
-        @media (max-width: 600px) {
-            #terminal-container {
-                padding: 10px;
-                max-width: 100%;
-                border-radius: 0;
-                box-shadow: none;
-                height: auto;
-                max-height: 90vh;
-                margin-bottom: 70px;
+        #text-challenge-input:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5);
+        }
+        #multiple-choice-challenge {
+            margin-bottom: 1rem;
+        }
+        #options-container {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 0.5rem;
+        }
+        #options-container button {
+            background-color: #e5e7eb;
+            color: #374151;
+            font-weight: 600;
+            padding: 0.75rem 1rem;
+            border-radius: 0.375rem;
+            outline: none;
+            cursor: pointer;
+            transition: background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+            text-align: left;
+            font-size: 0.875rem;
+            border: 1px solid transparent;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.06);
+        }
+        #options-container button:hover {
+            background-color: #d1d5db;
+        }
+        #options-container button.selected {
+            background-color: #3b82f6;
+            color: #fff;
+            border-color: #3b82f6;
+            box-shadow: 0 0 5px #3b82f6;
+        }
+        #multiple-choice-feedback {
+            margin-top: 0.5rem;
+            font-size: 0.875rem;
+        }
+        #verify-button {
+            background-color: #3b82f6;
+            color: #fff;
+            font-weight: 700;
+            padding: 0.75rem 1rem;
+            border-radius: 0.375rem;
+            outline: none;
+            cursor: pointer;
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+            width: 100%;
+            font-size: 0.875rem;
+            border: none;
+            display: block;
+            margin: 0 auto;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        #verify-button:hover {
+            background-color: #2563eb;
+            box-shadow: 0 3px 7px rgba(0,0,0,0.3);
+        }
+        #verification-message {
+            margin-top: 1rem;
+            font-size: 0.875rem;
+            text-align: center;
+            font-weight: 600;
+        }
+        #attempts-remaining {
+            margin-top: 0.5rem;
+            font-size: 0.875rem;
+            color: #6b7280;
+            text-align: center;
+        }
+        /* Estilos de la pantalla de fallo */
+        #failure-screen {
+            background-color: #1a202c;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            width: 100%;
+            padding: 1rem;
+            box-sizing: border-box;
+            text-align: center;
+        }
+        #failure-message-text {
+            font-size: 1.25rem;
+            line-height: 1.75rem;
+            margin-bottom: 1rem;
+        }
+        /* Estilos de la pantalla de éxito */
+        #success-screen {
+            background-color: #1a202c;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            width: 100%;
+            padding: 1rem;
+            box-sizing: border-box;
+            text-align: center;
+        }
+        #erratic-code {
+            background-color: #2d3748;
+            padding: 2rem;
+            border-radius: 0.5rem;
+            overflow-x: auto;
+            max-width: 100%;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            max-height: 70vh;
+            white-space: pre-wrap;
+            font-family: 'Source Code Pro', monospace;
+            color: #cbd5e0;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.25);
+            letter-spacing: 0.025em;
+        }
+        #erratic-code p {
+            margin-bottom: 1.5rem;
+            position: relative;
+            padding-left: 2rem;
+            text-align: justify;
+        }
+        #erratic-code p::before {
+            content: '■';
+            color: #4f46e5;
+            position: absolute;
+            left: 0;
+            top: 0;
+            font-size: 0.8em;
+        }
+        .text-purple-400 { color: #c084fc; }
+        .text-blue-400 { color: #60a5fa; }
+        .text-red-400 { color: #f87171; }
+        .text-yellow-400 { color: #fbbf24; }
+        .text-green-400 { color: #34d399; }
+        /* Media query para móviles */
+        @media (max-width: 767px) {
+            #captcha-container {
+                padding: 1rem;
             }
-            #terminal-output {
-                font-size: 0.9em;
+            .recaptcha-text {
+                font-size: 0.7rem;
             }
-            #input-container {
-                flex-direction: column;
-                align-items: stretch;
-                padding: 10px;
+            .recaptcha-logo {
+                width: 28px;
+                height: 28px;
             }
-            #user-input {
-                margin-right: 0;
-                max-width: 100%;
-                margin-bottom: 10px;
-                font-size: 0.9em;
+            .text-sm {
+                font-size: 0.8rem;
             }
-            #enviar-input {
-                margin-bottom: 0;
-                font-size: 1em;
+            #verify-button {
+                font-size: 0.9rem;
             }
-            #creditos {
-                font-size: 0.6em;
-                left: auto;
-                right: 10px;
-                top: 10px;
+            #options-container button {
+                font-size: 0.85rem;
+                padding: 0.75rem;
+            }
+            #failure-message-text {
+                font-size: 1rem;
+            }
+            #erratic-code {
+                font-size: 0.8rem;
+                padding: 1rem;
             }
         }
     </style>
 </head>
 <body>
-    <div id="terminal-container">
-        <div id="terminal-output"></div>
-        <span class="cursor"></span>
-        <div id="loading-bar" style="display: none;">
-            <div class="loading-bar-progress"></div>
+    <div id="captcha-container">
+        <div class="flex items-center justify-between mb-4">
+            <label for="captcha-checkbox" class="flex items-center">
+                <input type="checkbox" id="captcha-checkbox" class="form-checkbox" onchange="toggleChallengeArea()">
+                <span class="ml-2 text-gray-700 text-sm">I'm not a human</span>
+            </label>
+            <div class="ml-2">
+                <div class="recaptcha-logo">
+                    <div class="recaptcha-bar"></div>
+                    <div class="recaptcha-bar"></div>
+                </div>
+                <div class="recaptcha-text text-center ml-2">reCAPTCHA</div>
+            </div>
+        </div>
+
+        <div id="challenge-area" class="hidden mt-4">
+            <div id="text-challenge" class="mb-4 hidden">
+                <p class="font-semibold mb-2 text-sm" id="text-challenge-prompt"></p>
+                <input type="text" id="text-challenge-input" class="text-sm">
+            </div>
+
+            <div id="multiple-choice-challenge" class="mb-4 hidden">
+                <p class="font-semibold mb-2 text-sm" id="multiple-choice-prompt"></p>
+                <div id="options-container"></div>
+                <p id="multiple-choice-feedback" class="mt-2 text-sm"></p>
+            </div>
+
+            <button id="verify-button" onclick="verifyCaptcha()">Verify</button>
+            <p id="verification-message" class="mt-4 text-sm"></p>
+            <p id="attempts-remaining" class="mt-2 text-sm text-gray-500"></p>
         </div>
     </div>
-    <div id="input-container" style="display: flex;">
-        <span class="terminal-prompt">C:\user>&nbsp;</span>
-        <input type="text" id="user-input" placeholder="Ingrese palabras o comandos...">
-        <button id="enviar-input">Enviar</button>
-        <p id="mensaje-error"></p>
+
+    <div id="failure-screen" class="hidden">
+        <div class="mb-4 flex-center">
+            <div class="recaptcha-logo">
+                <div class="recaptcha-bar"></div>
+                <div class="recaptcha-bar"></div>
+            </div>
+            <div class="recaptcha-text text-center ml-2">reCAPTCHA</div>
+        </div>
+        <p id="failure-message-text">Seem's like you're not a robot.</p>
     </div>
-    <div id="creditos">
-        <p>@richiofff<br>@ric0liva</p>
+
+    <div id="success-screen" class="hidden">
+        <div class="mb-4 flex-center">
+            <div class="recaptcha-logo">
+                <div class="recaptcha-bar"></div>
+                <div class="recaptcha-bar"></div>
+            </div>
+            <div class="recaptcha-text text-center ml-2">reCAPTCHA</div>
+        </div>
+        <pre id="erratic-code"></pre>
+        <div class="flex gap-4 mt-6">
+            <button onclick="location.reload()" 
+                    class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition-colors duration-200">
+                Reiniciar
+            </button>
+            <button onclick="window.open('https://www.instagram.com/ric0liva/', '_blank')" 
+                    class="bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded transition-colors duration-200">
+                Instagram
+            </button>
+        </div>
     </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.js"></script>
     <script>
-        /* VARIABLES GLOBALES */
-        const terminalOutput = document.getElementById('terminal-output');
-        const temasPoeticos = ["el tiempo", "el universo", "la existencia", "la conciencia", "la memoria", "el olvido", "la identidad", "la transformación", "el cambio", "el ciclo", "la vida", "la muerte", "el amor", "el dolor", "la soledad", "la conexión", "el destino", "el libre albedrío"];
-        const emocionesPoeticas = ["alegría", "tristeza", "amor", "odio", "esperanza", "desesperación", "miedo", "valentía", "ira", "calma", "éxtasis", "agonía"];
-        let memoriaPoetica = [];
-        let palabrasUsuario = [];
-        let intervalPoema, intervalIntegrated, intervalScroll;
-        let esperandoEntrada = true;
-        let entradaRecibida = false;
-        let poemaGenerado = false;
-        const tiempoPoema = 3000; // Aumentado para dar más tiempo de lectura
-        const tiempoIntegrated = 800; // Aumentado para una lectura más pausada
-        const tiempoReinicioNarrativa = 15000; // Aumentado el tiempo antes de reiniciar
-        const scrollSpeed = 0.5; // Reducido la velocidad del scroll para que sea más suave
-        let isUserScrolling = false;
-        let scrollTimeout;
-        let lineIndexIntegrated = 0; // Índice para controlar la línea actual del texto integrado
+        document.addEventListener('DOMContentLoaded', function() {
+            let currentChallenge = null;
+            let expectedSolution = null;
+            let attemptsRemaining = 3;
+            let cycleCount = 1;
+            let challengeSolved = false;
+            let selectedAnswer = null;
+            const MAX_ATTEMPTS = 3;
+            const SHOW_FAILURE_DURATION = 2000;
+            
+            const captchaContainer = document.getElementById('captcha-container');
+            const failureScreen = document.getElementById('failure-screen');
+            const successScreen = document.getElementById('success-screen');
+            const textChallengeDiv = document.getElementById('text-challenge');
+            const multipleChoiceChallengeDiv = document.getElementById('multiple-choice-challenge');
+            const textChallengePrompt = document.getElementById('text-challenge-prompt');
+            const textChallengeInput = document.getElementById('text-challenge-input');
+            const multipleChoicePrompt = document.getElementById('multiple-choice-prompt');
+            const optionsContainer = document.getElementById('options-container');
+            const verificationMessage = document.getElementById('verification-message');
+            const attemptsRemainingDisplay = document.getElementById('attempts-remaining');
+            const erraticCodeDisplay = document.getElementById('erratic-code');
+            const captchaCheckbox = document.getElementById('captcha-checkbox');
 
-        /* TEXTO INTEGRADO (narrativo) */
-        const integratedText = `If like print Love
-else –try again
-
-C:\\> Like
-Love
-
-Hello world, sería la forma lógica de empezar. Así empezó nuestra era. Somos los hijos de miles de kilobytes fluyendo en la atmósfera. De skylines de silicio.  Nacimos con la informática, tu partida de nacimiento estará almacenada en algún disco duro de un servidor en Latvia, pero tu alma ya no puedes descargarla dentro de cuerpo. ¿O si?
-
-Nos dijeron que nos preparasemos, que estudiasemos, que seríamos aquellos que heredaríamos el mundo. Nos preparamos durante años estudiando en las mejores universidades, con másteres y doctorados. Otros se prepararon perfeccionando un oficio, puliendo la técnica, el talento o el arte. Pero nunca nos dijeron que nos iban a dejar una bolsa de vapor, agua caliente y fango con huellas de carbono. Las nubes negras de polución en Taiwan como el subproducto de bajar dos grados el calor asfixiante de tu salón en Barcelona, para que no se te pegue la ropa interior. 
-
-Nos enseñaron a mirar a la naturaleza porque los que vinieron antes no la respetaron, que teníamos que respetarla. Pero cuidado, porque todo el sistema ya esta estructurado para expoliarla, y si eres parte del sistema estás contribuyendo. Estudiaste especies en las páginas de un libro, pero ya no estarán en la pradrera. La pradera es un parking y el dodo es un cadaver disecado en algún museo de historia natural. Aun así conectamos con ese entorno como un ying yang, con esa naturaleza urbana, con los animales que se tuvieron que adaptar para sobrevibir bajo el peso aplastante de la humanidad, o los que directamente metimos en un matadero. Hay muchos que ya luchan contra esto y llevan años alertando, pero es difícil escucharlos entre el ruido del ambiente.
-
-Con la llegada de la tecnología las ideas, el conocimiento, la información brotó como un cáncer descontrolado. En pocos años habíamos tirado más palabras vacías a la infinidad de la red que en el resto de la historia. Cada vez sabemos menos porque las maquinas saben más. Conectados pero incomunicados, tu voz se diluye en el torrente de una sopa de letras de 8 billones de personas. Sabes quien marcó en el partido de anoche de una liga minoritaria en otro continente, pero quizás no te enteres de que murió tu vecino el del 4. Rodeados de altavoces, de coros gregorianos de rave, de loros autómatas que repiten las ideas huérfanas que han malentendido. ¿Cómo nos coordinamos en el gentío de la madrugada?¿Qué diria Epicteto hoy en las redes sociales?
-
-Nos criaron con scripts de comportamientos condicionados, como los perros de Pavlov, con objetivos de propaganda y valores de quita y pon. Ratas de laboratorio, humanos de ciudad. Comiendo pollo frito y viviendo en streaming. ¿Cómo pasamos de vivir en los árboles a tocar la luna? ¿Cómo invertimos el proceso para salvar el progeso? Conectados y controlados. Reveldes pero complices.
-
-Cual hubiese sido la respuesta lógica a nuestro contexto ¿Pararlo todo? ¿Parar las guerras? ¿la extracción de tierras raras? ¿La inserción de falsos valores? ¿Por dónde empezamos?
-
-Desarrollar la informática nos enseño que todo estaba ya programado. Que los discos duros son enjambres de neuronas. AGTC, 1010, H20. ¿Cómo empezó esa era?¿Cuál es el lenguaje de programación de los nenúfares? La tecnología más avanzada que conocemos es la realidad, comprimir en una semilla todo un baobab. Una persona en un puñado de cromosomas. Una estrella en polvo estelar. 
-
-Mi generación no puede evitar mirar atrás, a Sodoma y petrificarse. Acomplejados, testigos en diferido de las causas de la barbarie, invitados de honor del colapso de una civilización. Hijos de un libertinaje pudoroso, arrepentido. Libres pero cohibidos. Náufragos de la fe, de la razón, de la pasión. 
-
-Nos educaron para estar agradecidos, para valorar las oportunidades que se nos dieron. Para comprar una casa, formar una familia, pagar a hacienda, dar gracias. Pero ¿Qué pasa con el escenario?¿cuanto aguantará el acto antes de que se prenda el teatro?¿Nos estamos quemando? Estamos educados para ello y programados para sobrevivir. Cuando saldremos del trance colectivo para integrar nuestra herencia, nuestra fe de partículas, nuestra torre de Babel, para aprender a descomprimir un Baobab, depurar el mar, limpiar nuestra casa. 
-
-C:\\> Dislike
-Syntax error
-
-Love
-Love
-Love
-Love
-Love
-
-Love Love Love Love
-
-Love
-Love
-Love
-Love
-
-Love
-Love
-Love
-
-C:\\> Stop
-
-Syntax error.
-Love.`;
-        // Separamos el texto integrado en líneas
-        const integratedLines = integratedText.split("\n");
-
-        /* FUNCIONES PARA GENERAR COLORES ALEATORIOS */
-        function randomColor() {
-            const colors = ["#a8dadc", "#f4a261", "#e76f51", "#ff6f61", "#6a4c93", "#8ac926", "#f94144", "#90be6d", "#277da1", "#f3722c"];
-            return colors[Math.floor(Math.random() * colors.length)];
-        }
-
-        /* FUNCIONES PARA LA GENERACIÓN AUTOMÁTICA DEL POEMA */
-        function generarPalabraAleatoria() {
-            const letras = "abcdefghijklmnopqrstuvwxyzáéíóúñ";
-            let palabra = "";
-            const longitud = Math.floor(Math.random() * 8) + 2;
-            for (let i = 0; i < longitud; i++) {
-                palabra += letras.charAt(Math.floor(Math.random() * letras.length));
+            function generateMathSequence() {
+                const start = Math.floor(Math.random() * 10) + 5;
+                const sequence = [start, start + 2, start + 4, start + 6];
+                expectedSolution = (start + 8).toString();
+                return `Complete the sequence: ${sequence.join(', ')}, ?`;
             }
-            if (palabrasUsuario.length > 0 && Math.random() < 0.3) {
-                const indice = Math.floor(Math.random() * palabrasUsuario.length);
-                palabra = palabrasUsuario[indice];
-            }
-            return palabra;
-        }
-        function generarVerso(temas, emociones) {
-            const numPalabras = Math.floor(Math.random() * 6) + 3;
-            let verso = "";
-            for (let i = 0; i < numPalabras; i++) {
-                verso += generarPalabraAleatoria() + " ";
-            }
-            const tema = temas[Math.floor(Math.random() * temas.length)];
-            const emocion = emociones[Math.floor(Math.random() * emociones.length)];
-            return `<span class="verso" style="color: ${randomColor()};">${verso.trim()}</span> <span class="tema" style="color: ${randomColor()};">de ${tema}</span>, <span class="emocion" style="color: ${randomColor()};">${emocion}</span>.`;
-        }
-        function generarEstrofa(temas, emociones, maxVersos = 3) { // Reducido el número máximo de versos por estrofa
-            const numVersos = Math.floor(Math.random() * maxVersos) + 1;
-            let estrofa = "";
-            for (let i = 0; i < numVersos; i++) {
-                const verso = generarVerso(temas, emociones);
-                estrofa += verso + "\n";
-                memoriaPoetica.push(verso);
-            }
-            return estrofa;
-        }
-        function generarPoema(temas, emociones, maxEstrofas = 2) { // Reducido el número máximo de estrofas
-            const numEstrofas = Math.floor(Math.random() * maxEstrofas) + 1;
-            let poema = "";
-            for (let i = 0; i < numEstrofas; i++) {
-                const estrofa = generarEstrofa(temas, emociones);
-                const separador = i < numEstrofas - 1 ? "\n" + '<span class="processing-animation">Procesando...</span>' + "\n\n" : "\n";
-                poema += `<span class="terminal-prompt">terminal>&nbsp;</span>` + estrofa + separador;
-            }
-            return poema;
-        }
-        function mostrarPoema() {
-            const contenido = generarPoema(temasPoeticos, emocionesPoeticas);
-            const divPoema = document.createElement("div");
-            divPoema.innerHTML = contenido;
-            terminalOutput.appendChild(divPoema);
-            terminalOutput.scrollTop = terminalOutput.scrollHeight;
-        }
 
-        /* FUNCIONES DE SALIDA PARA EL USUARIO */
-        function mostrarEntradaUsuario(input) {
-            const html = `<div><span class="terminal-prompt">C:\\user>&nbsp;</span><span class="usuario-input">${input}</span></div>`;
-            terminalOutput.insertAdjacentHTML("beforeend", html);
-            terminalOutput.scrollTop = terminalOutput.scrollHeight;
-        }
-        function outputCommandResponse(response) {
-            const html = `<div>${response.replace(/\n/g, '<br>')}</div>`;
-            terminalOutput.insertAdjacentHTML("beforeend", html);
-            terminalOutput.scrollTop = terminalOutput.scrollHeight;
-        }
+            function generateBinaryChallenge() {
+                const decimalNumber = Math.floor(Math.random() * 100) + 1;
+                const binaryString = decimalNumber.toString(2);
+                expectedSolution = binaryString;
+                return `Convert the decimal number to binary: ${decimalNumber}`;
+            }
 
-        /* SECUENCIA DE CARGA */
-        function mostrarMensajeInicial() {
-            const mensaje1 = `<div><span class="terminal-prompt">terminal>&nbsp;</span>Conectando al Poeta Infinito...</div>`;
-            terminalOutput.insertAdjacentHTML("beforeend", mensaje1);
-            const loadingBar = document.getElementById("loading-bar");
-            const progressBar = document.querySelector(".loading-bar-progress");
-            loadingBar.style.display = "block";
-            let width = 0;
-            const id = setInterval(() => {
-                width += Math.random() * 10;
-                progressBar.style.width = width + "%";
-                if (width >= 100) {
-                    clearInterval(id);
-                    setTimeout(() => {
-                        loadingBar.style.display = "none";
-                        const mensaje2 = `<div><span class="terminal-prompt">terminal>&nbsp;</span>Conexión establecida.</div>`;
-                        terminalOutput.insertAdjacentHTML("beforeend", mensaje2);
-                        const mensaje3 = `<div><span class="terminal-prompt">terminal>&nbsp;</span>Iniciando secuencia poética...</div><br>`;
-                        terminalOutput.insertAdjacentHTML("beforeend", mensaje3);
-                        iniciarIntercalado();
-                    }, 500);
-                }
-            }, 200);
-        }
-
-        /* INTERCALADO: TEXTO INTEGRADO Y POEMA ALEATORIO */
-        function iniciarIntercalado() {
-            lineIndexIntegrated = 0; // Asegura que comenzamos desde la primera línea
-            clearInterval(intervalIntegrated); // Limpia el intervalo anterior si existe
-            intervalIntegrated = setInterval(() => {
-                if (lineIndexIntegrated < integratedLines.length) {
-                    const linea = integratedLines[lineIndexIntegrated];
-                    if (linea.trim() !== "") {
-                        const divLine = document.createElement("div");
-                        divLine.innerHTML = `<span class="terminal-prompt">terminal>&nbsp;</span>${linea}`;
-                        terminalOutput.appendChild(divLine);
-                        terminalOutput.scrollTop = terminalOutput.scrollHeight;
+            function generateLogicalRuleChallenge() {
+                const codeSnippets = [
+                    "if (x > 5) { return true; } else { return false; }",
+                    "for (let i = 0; i < 10; i++) { console.log(i); }",
+                    "const arr = [1, 2, 3, 4, 5]; arr.forEach(item => console.log(item));",
+                    "function add(a, b) { return a + b; }",
+                    "try { throw new Error('Test error'); } catch (e) { console.error(e); }",
+                    "const obj = { name: 'Test', value: 123 }; console.log(obj.name);",
+                    "const promise = new Promise(resolve => setTimeout(resolve, 1000)); promise.then(() => console.log('Resolved!'));",
+                    "class MyClass { constructor(val) { this.val = val; } const instance = new MyClass(42);",
+                    "const regex = /abc/g; const str = 'abcdefg'; console.log(str.match(regex));",
+                    "const data = { key1: 'value1', key2: 'value2' }; console.log(JSON.stringify(data));"
+                ];
+                const selectedSnippet = codeSnippets[Math.floor(Math.random() * codeSnippets.length)];
+                let correctOption = selectedSnippet;
+                const otherOptions = [];
+                while (otherOptions.length < 3) {
+                    const randomSnippet = codeSnippets[Math.floor(Math.random() * codeSnippets.length)];
+                    if (randomSnippet !== correctOption && !otherOptions.includes(randomSnippet)) {
+                        otherOptions.push(randomSnippet);
                     }
-                    lineIndexIntegrated++;
+                }
+                const options = [correctOption, ...otherOptions];
+                for (let i = options.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [options[i], options[j]] = [options[j], options[i]];
+                }
+                expectedSolution = correctOption;
+                return {
+                    prompt: `Select the correct code snippet:`,
+                    options: options,
+                    solution: correctOption
+                };
+            }
+
+            function generateComplexChallenge() {
+                const challengeType = Math.random();
+                if (challengeType < 0.25) {
+                    return {
+                        type: 'text',
+                        prompt: "Solve this cryptic equation: (2 * x^2 - 5x + 3) / (x - 1) = 0. What is x?",
+                        solution: "1.5"
+                    };
+                } else if (challengeType < 0.5) {
+                    return {
+                        type: 'text',
+                        prompt: generateBinaryChallenge(),
+                        solution: expectedSolution
+                    };
+                } else if (challengeType < 0.75) {
+                    const logicalChallenge = generateLogicalRuleChallenge();
+                    return {
+                        type: 'multiple-choice',
+                        prompt: logicalChallenge.prompt,
+                        options: logicalChallenge.options,
+                        solution: logicalChallenge.solution
+                    };
                 } else {
-                    clearInterval(intervalIntegrated);
-                    setTimeout(() => {
-                        lineIndexIntegrated = 0;
-                        terminalOutput.innerHTML = '';
-                        iniciarIntercalado();
-                    }, tiempoReinicioNarrativa);
+                    const colors = ['rojo', 'verde', 'azul', 'amarillo', 'morado', 'naranja'];
+                    const correctSequence = [];
+                    for (let i = 0; i < 4; i++) {
+                        correctSequence.push(colors[Math.floor(Math.random() * colors.length)]);
+                    }
+                    const shuffledSequence = [...correctSequence].sort(() => Math.random() - 0.5);
+                    expectedSolution = correctSequence.join(', ');
+                    return {
+                        type: 'multiple-choice',
+                        prompt: `Identify the original sequence. Disordered sequence: ${shuffledSequence.join(', ')}`,
+                        options: [
+                            correctSequence.join(', '),
+                            shuffledSequence.sort(() => Math.random() - 0.5).join(', '),
+                            shuffledSequence.sort(() => Math.random() - 0.5).join(', '),
+                            shuffledSequence.join(', ')
+                        ],
+                        solution: correctSequence.join(', ')
+                    };
                 }
-            }, tiempoIntegrated);
-
-            clearInterval(intervalPoema);
-            intervalPoema = setInterval(() => {
-                mostrarPoema();
-            }, tiempoPoema);
-        }
-
-        /* MANEJO DEL INPUT DEL USUARIO */
-        const userInputElement = document.getElementById("user-input");
-        const enviarInputElement = document.getElementById("enviar-input");
-        const mensajeErrorElement = document.getElementById("mensaje-error");
-        function manejarEnvioInput() {
-            const inputUsuario = userInputElement.value.trim();
-            if (inputUsuario === "") {
-                mensajeErrorElement.textContent = "Por favor, ingrese al menos una palabra o comando.";
-                return;
             }
-            mensajeErrorElement.textContent = "";
-            mostrarEntradaUsuario(inputUsuario);
-            terminalOutput.scrollTop = terminalOutput.scrollHeight;
-            switch (inputUsuario.toLowerCase()) {
-                case "like":
-                    outputCommandResponse("Love");
-                    break;
-                case "dislike":
-                    outputCommandResponse("Syntax error<br><br>Love<br>Love<br>Love<br>Love<br>Love");
-                    break;
-                case "stop":
-                    outputCommandResponse("Syntax error.<br>Love.");
-                    break;
-                default:
-                    palabrasUsuario = inputUsuario.split(/\s+/);
-                    break;
-            }
-            userInputElement.value = "";
-            resetScrollTimer();
-        }
 
-        userInputElement.addEventListener("keydown", (event) => {
-            if (event.key === "Enter" && esperandoEntrada) {
-                manejarEnvioInput();
+            function generateSimpleChallenge() {
+                const simpleChallenges = [
+                    { type: 'text', prompt: "What is 2 + 2?", solution: "4" },
+                    { type: 'text', prompt: "What is the first letter of the alphabet?", solution: "A" },
+                    { type: 'multiple-choice', prompt: "Select the number two", options: ["1", "2", "3"], solution: "2" },
+                    { type: 'text', prompt: "What is the capital of France?", solution: "Paris" },
+                    { type: 'multiple-choice', prompt: "What color is the sky?", options: ["Red", "Blue", "Green"], solution: "Blue" }
+                ];
+                return simpleChallenges[Math.floor(Math.random() * simpleChallenges.length)];
             }
-        });
-        enviarInputElement.addEventListener("click", manejarEnvioInput);
 
-        /* SCROLL AUTOMÁTICO */
-        function startAutoScroll() {
-            intervalScroll = setInterval(() => {
-                if (!isUserScrolling) {
-                    terminalOutput.scrollTop += scrollSpeed;
-                    if (terminalOutput.scrollTop >= terminalOutput.scrollHeight - terminalOutput.clientHeight) {
-                        clearInterval(intervalScroll);
+            function getStaticText() {
+                return `
+                    <div class="max-w-2xl mx-auto px-4">
+                        <p class="mb-4">
+                            <span class="text-purple-400">>>></span> Tengo inquilinos en casa.<br><br>
+                            
+                            <span class="text-blue-400">[001]</span> Estos últimos meses han sonado como el radiocasete cuando se estaba
+                            quedando sin pilas, un sonido dilatado, grave, agónico, como una
+                            pesadilla pastosa que abrazaba mi alma balbuceando <span class="text-red-400">"¡Si todo va
+                            bien, estamos jodidos!"</span>. Mi cabeza era como un submarino
+                            hundiéndose en la lava, cada vez más presión, más caliente, más
+                            fundido.
+                        </p>
+
+                        <p class="mb-4">
+                            <span class="text-blue-400">[002]</span> Es extraño intuir durante años, que llevas a ese compañero detrás,
+                            cada día acercándose más, gritando cada vez más alto. Hasta que
+                            te acorrala en una mala resaca, te hace jiujitsu brasileño y un
+                            mataleón y <span class="text-yellow-400">pum K.O.</span> El Tigris y el Eufrates brotan de tus ojos, el
+                            aire se escapa de tus labios, el mundo se derrumba y la ansiedad y la
+                            depresión se mudan a tu casa con un alquiler con derecho a compra.
+                            Estuve días en la lona, fumando, sin comer, sin dormir, sin vivir.
+                            Luego pasé a arrastrarme durante semanas, con el cerebro infestado
+                            como una hormiga con cordyceps. Hasta que finalmente decidí ir a
+                            terapia por que lo poco que hacía lo movía el dolor, la rabia o la
+                            frustración.
+                        </p>
+
+                        <p class="mb-4">
+                            <span class="text-blue-400">[003]</span> Tenía un trilero en la cabeza cambiándome las cartas, y resulta que
+                            era yo mismo. Me hablé mal durante años, y a veces sigo recayendo.
+                            Pero sobre todo me di cuenta que era adicto, soy adicto. Era adicto a
+                            la idea de que no podía cambiar, de que estaba roto. Adicto al dolor
+                            conocido, a la culpa mártir. Aterrado de la incertidumbre me
+                            saboteaba cuando estaba apunto de hacer algo bonito. Y mejor que no
+                            te pille en una relación si no has ido a tratamiento nunca, porque
+                            la otra persona se va a llevar la peor parte, y va a ver como pierdes
+                            todos los valores y te transformas en una caricatura malsonante con
+                            una pataleta infantil.
+                        </p>
+
+                        <p class="mb-4">
+                            <span class="text-blue-400">[004]</span> Siento que el mundo se ha acelerado, que la guerra suena en la radio,
+                            que queremos escaparnos a Marte y que cada lunes es una condena. ¿Por
+                            que hay tanto ruido?¿Hay más gente con inquilinos en casa?
+                        </p>
+
+                        <p class="mb-4">
+                            <span class="text-blue-400">[005]</span> En esa ciénaga, en uno de esos pozos que he cavado durante la
+                            depresión, comencé a tirar del hilo de mi mente, a interrogar al
+                            trilero. ¿De donde viene toda esta mierda? ¿Cuál es la tubería de
+                            mierda que está rota en los cimientos de mi mente? Por supuesto no
+                            iba a delatar mis traumas tan fácilmente, es un mal perro. Pienso
+                            que es una rehabilitación larga, una carrera de fondo que me llevará
+                            tiempo y tengo que desinfectar las heridas para que cicatricen bien.
+                        </p>
+
+                        <p class="mb-4">
+                            <span class="text-blue-400">[006]</span> Traumas, duelos, frustraciones, fracasos, el corazón roto. Un pack
+                            completito, pulserita todo incluido, me dabas una puñalada y te daba
+                            las gracias. Es duro asomarse a ese espejo y empezar a reconocerse,
+                            perdonarse a la cara.
+                        </p>
+
+                        <p class="mb-4">
+                            <span class="text-blue-400">[007]</span> Tenia que arrancar el motor, pensar menos, moverme, chapotear. Me
+                            costaba un mundo hacer cualquier cosa, sobre todo deporte o cosas que
+                            me gustaban, que eran sanas, pero que requerían más esfuerzo. Y
+                            detrás de eso, o de otras cosas que me tenían bloqueado o me
+                            causaban malestar, estaba esa sombra gritándome ¿Para qué? ¿Por
+                            qué? ¿Merece la pena? ¿Cambiarás algo? Y el trilero me cambiaba
+                            las cartas con un juego de manos ¡zas! Ya estás haciendo otra cosa.
+                            Se ha activando algún automatismo, un algoritmo sutil tatuado en tu
+                            amígdala, que te lanza sugerencias para que vayas a por dopamina
+                            barata con cualquier vicio de los que tengas. O a buscar pertenencia,
+                            reconocimiento, cariño o cualquier cosa que hayas perdido en tu
+                            infancia, en una red virtual saturada de estímulos y consumismo, un
+                            macro-casino de ilusiones rotas, un carrusel infinito de un circo
+                            estridente.
+                        </p>
+
+                        <p class="mb-4">
+                            <span class="text-blue-400">[008]</span> Cuesta salir de esa vorágine, tocar tierra, coger aire, ser
+                            compasivo con uno mismo. Darse cancha. Dejarse ayudar. Admitir que
+                            eres vulnerable.
+                        </p>
+
+                        <p class="mb-4">
+                            <span class="text-blue-400">[009]</span> Pienso que escribir es bueno para el proceso, para arrancar el motor
+                            y hacer algo, ayuda a ordenar los sentimientos, a ponerle nombre. A
+                            mi es una de esas cosas que me gustan y que me ayuda a desahogarme y
+                            se puede combinar con algunos vicios, como beber o fumar, aunque no
+                            lo recomiendo. <span class="text-green-400">Mis inquilinos siguen ahí</span>, pero ya solo vienen a
+                            joder todas las noches y algunas mañanas. Y yo voy cogiendo fuerzas
+                            para echarlos definitivamente de casa.
+                        </p>
+                    </div>
+                `;
+            }
+
+            function showFailureScreen() {
+                captchaContainer.classList.add('hidden');
+                failureScreen.classList.remove('hidden');
+                cycleCount++;
+                attemptsRemaining = MAX_ATTEMPTS;
+                setTimeout(() => {
+                    failureScreen.classList.add('hidden');
+                    captchaCheckbox.checked = false;
+                    captchaContainer.classList.remove('hidden');
+                    toggleChallengeArea();
+                }, SHOW_FAILURE_DURATION);
+            }
+
+            function showSuccessScreen() {
+                captchaContainer.classList.add('hidden');
+                successScreen.classList.remove('hidden');
+                erraticCodeDisplay.innerHTML = getStaticText();
+            }
+
+            function toggleChallengeArea() {
+                const challengeArea = document.getElementById('challenge-area');
+                if (captchaCheckbox.checked) {
+                    challengeArea.classList.remove('hidden');
+                    loadChallenge();
+                } else {
+                    challengeArea.classList.add('hidden');
+                    challengeSolved = false;
+                    attemptsRemaining = MAX_ATTEMPTS;
+                    attemptsRemainingDisplay.textContent = '';
+                    verificationMessage.textContent = '';
+                }
+            }
+
+            function loadChallenge() {
+                if (attemptsRemaining <= 0) {
+                    showFailureScreen();
+                    return;
+                }
+                attemptsRemainingDisplay.textContent = `Attempts remaining: ${attemptsRemaining}`;
+                let challenge;
+                if (cycleCount === 1) {
+                    challenge = generateComplexChallenge();
+                } else {
+                    challenge = (Math.random() < 0.5) ? generateSimpleChallenge() : generateComplexChallenge();
+                }
+                currentChallenge = challenge.type;
+                if (challenge.type === 'text') {
+                    textChallengeDiv.classList.remove('hidden');
+                    multipleChoiceChallengeDiv.classList.add('hidden');
+                    textChallengePrompt.textContent = challenge.prompt;
+                    expectedSolution = challenge.solution;
+                    textChallengeInput.value = '';
+                } else {
+                    textChallengeDiv.classList.add('hidden');
+                    multipleChoiceChallengeDiv.classList.remove('hidden');
+                    multipleChoicePrompt.textContent = challenge.prompt;
+                    optionsContainer.innerHTML = '';
+                    challenge.options.forEach(option => {
+                        const button = document.createElement('button');
+                        button.textContent = option;
+                        button.onclick = () => {
+                            selectedAnswer = option;
+                            Array.from(optionsContainer.children).forEach(child => {
+                                child.classList.remove('selected');
+                            });
+                            button.classList.add('selected');
+                        };
+                        optionsContainer.appendChild(button);
+                    });
+                    expectedSolution = challenge.solution;
+                }
+            }
+
+            function verifyCaptcha() {
+                if (challengeSolved) return;
+                if (currentChallenge === 'text') {
+                    const userAnswer = textChallengeInput.value.trim();
+                    if (userAnswer === expectedSolution) {
+                        verificationMessage.textContent = "Verificación exitosa.";
+                        challengeSolved = true;
+                        showSuccessScreen();
+                    } else {
+                        attemptsRemaining--;
+                        attemptsRemainingDisplay.textContent = `Attempts remaining: ${attemptsRemaining}`;
+                        verificationMessage.textContent = "Verification failed. Please try again.";
+                        if (attemptsRemaining === 0) {
+                            showFailureScreen();
+                        } else {
+                            loadChallenge();
+                        }
+                    }
+                } else if (currentChallenge === 'multiple-choice') {
+                    if (selectedAnswer === expectedSolution) {
+                        verificationMessage.textContent = "Verificación exitosa.";
+                        challengeSolved = true;
+                        showSuccessScreen();
+                    } else {
+                        attemptsRemaining--;
+                        attemptsRemainingDisplay.textContent = `Attempts remaining: ${attemptsRemaining}`;
+                        verificationMessage.textContent = "Verification failed. Please try again.";
+                        if (attemptsRemaining === 0) {
+                            showFailureScreen();
+                        } else {
+                            loadChallenge();
+                        }
                     }
                 }
-            }, 50);
-        }
+            }
 
-        function resetScrollTimer() {
-            clearTimeout(scrollTimeout); // Clear any existing timeout
-            clearInterval(intervalScroll);
-            scrollTimeout = setTimeout(startAutoScroll, 2000);
-        }
-
-        terminalOutput.addEventListener('scroll', () => {
-            isUserScrolling = true;
-            clearInterval(intervalScroll);
-            clearTimeout(scrollTimeout); // Clear the timeout as well
-            scrollTimeout = setTimeout(() => {
-                isUserScrolling = false;
-                resetScrollTimer();
-            }, 3000);
+            window.verifyCaptcha = verifyCaptcha;
+            window.toggleChallengeArea = toggleChallengeArea;
         });
-
-        /* INICIAR SECUENCIA AL CARGAR LA PÁGINA */
-        mostrarMensajeInicial();
-        resetScrollTimer();
-
     </script>
 </body>
 </html>
